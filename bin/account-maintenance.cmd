@@ -42,7 +42,6 @@ set loop3_sleep_seconds=1
 
 if defined __debug echo [%TIME:~0,8%] DEBUG: %%0:         "%0"
 if defined __debug echo [%TIME:~0,8%] DEBUG: %%~dp0:      "%~dp0"
-if defined __debug echo [%TIME:~0,8%] DEBUG: %%~dp0:      "%~dp0..\etc\account-maintenance.conf"
 set __conffile=%~dp0..\etc\account-maintenance.conf
 if defined __debug echo [%TIME:~0,8%] DEBUG: __conffile: "!__conffile!"
 
