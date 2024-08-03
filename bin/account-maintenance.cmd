@@ -1,6 +1,37 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
 
+::  notes:
+::
+::  * The challenge of getting the current (local) time in a string of text,
+::    in a consistent format:
+::
+::    Observations:
+::
+::      - On Windows 11, one locale setting [cmd.exe shell session]:
+::
+::            $ echo %TIME%
+::            14:25:26.08
+::
+::      - On Windows 11, another locale setting [cmd.exe shell session]:
+::
+::            $ echo %TIME%
+::            14.24.46,88
+::
+::    The workaround I chose is to extract each hh mm ss components (and
+::    assume that in the %TIME% value, the order is always the same, and
+::    delimiters are always 1 character, regardless of localization):
+::    here's an example [cmd.exe shell session]:
+::
+::        $ set time_str=%TIME%
+::
+::        $ echo %TIME:~0,8% & echo %time_str:~0,2%:%time_str:~3,2%:%time_str:~6,2%
+::        16:07:45
+::        16:07:45
+::
+::        $
+
+
 ::  define constants
 set loop1_until_minutesecond=58:58
 set loop2_until_minutesecond=59:53
@@ -38,7 +69,8 @@ if defined __debug echo [%TIME:~0,8%] DEBUG: variable target_hour: "%target_hour
 
 
 :_state_loop1
-IF %TIME:~0,8% LSS %current_hour%:!loop1_until_minutesecond! (
+set time_str=%TIME%
+IF %time_str:~0,2%:%time_str:~3,2%:%time_str:~6,2% LSS %current_hour%:!loop1_until_minutesecond! (
     if defined __debug echo [%TIME:~0,8%] DEBUG: current time is before %current_hour%:!loop1_until_minutesecond!, sleeping for !loop1_sleep_seconds! second^(s^).
     timeout.exe /t !loop1_sleep_seconds! 1>NUL
     goto _state_loop1
@@ -46,7 +78,8 @@ IF %TIME:~0,8% LSS %current_hour%:!loop1_until_minutesecond! (
     rem  here: current time must be xx:58:58 or later.
     rem  increase speed of "polling" to every 5 seconds.
 :_state_loop2
-    IF %TIME:~0,8% LSS %current_hour%:!loop2_until_minutesecond! (
+    set time_str=%TIME%
+    IF %time_str:~0,2%:%time_str:~3,2%:%time_str:~6,2% LSS %current_hour%:!loop2_until_minutesecond! (
         if defined __debug echo [%TIME:~0,8%] DEBUG: current time is before %current_hour%:!loop2_until_minutesecond!, sleeping for !loop2_sleep_seconds! second^(s^).
         timeout.exe /t !loop2_sleep_seconds! 1>NUL
         goto _state_loop2
@@ -54,7 +87,8 @@ IF %TIME:~0,8% LSS %current_hour%:!loop1_until_minutesecond! (
         rem  here: current time must be xx:59:53 or later.
         rem  increase speed of "polling" to every 1 seconds.
 :_state_loop3
-        echo %TIME:~0,8% | findstr.exe /r "^%target_hour%:!loop3_until_minutesecond!" 1>NUL && (
+        set time_str=%TIME%
+        echo %time_str:~0,2%:%time_str:~3,2%:%time_str:~6,2% | findstr.exe /r "^%target_hour%:!loop3_until_minutesecond!" 1>NUL && (
             call :verbose__net_exe_user !__username_to_maintain!
             if defined __verbose echo [%TIME:~0,8%] Attempting to set password for user account...
             rem  if defined __debug echo [%TIME:~0,8%] DEBUG: doing nothing for now.
