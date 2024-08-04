@@ -43,4 +43,40 @@ Development TO-DO
 IDEAS
 -----
 
-* Develop working instructions and/or code for running script as a service:
+* Develop working instructions and/or code for running
+  ``account-maintenance.cmd`` as a service:
+
+  Notes from initial naive attempt on Windows 10:
+
+      Excerpt from cmd.exe shell session::
+
+          C:\WINDOWS\system32>sc.exe create account-maintenance start= auto DisplayName= "account-maintenance" binPath= "%SystemRoot%\system32\cmd.exe /C set __verbose=true & set __debug=true & c:\Users\jcl\proj\winacctoolkit\bin\account-maintenance.cmd >> c:\Users\jcl\proj\winacctoolkit\account-maintenance.log 2>&1"
+          [SC] CreateService SUCCESS
+
+          C:\WINDOWS\system32>sc.exe start account-maintenance
+          [SC] StartService FAILED 1053:
+
+          The service did not respond to the start or control request in a timely fashion.
+
+
+          C:\WINDOWS\system32>
+
+      Observed above, when starting service:
+      cmd.exe script is started, log file is created and written to, but for
+      some reason Windows doesn't consider the service started.
+
+  Ideas for next step:
+
+  - try using https://github.com/mturk/svcbatch :
+
+        SvcBatch is a program that allows users to run script files as
+        Windows service.
+
+    My initial security evaluation:
+
+        The author seems to have a long history of contributions to free
+        software: Apache projects, Apache Tomcat etc.
+
+        Related links:
+
+        | https://www.mail-archive.com/dev@tomcat.apache.org/msg149344.html
